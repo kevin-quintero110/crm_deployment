@@ -1,0 +1,12 @@
+{"_id":{"$oid":"67506a82291a8207b02a0abe"},"nombre":"camisetas NodeJS","precio":12000,"imagen":"VRQTGIUNX.jpeg","__v":0}
+{"_id":{"$oid":"67506ca6291a8207b02a0b04"},"nombre":"camiseta javascript","precio":20000,"imagen":"ZiodqaWpG.jpeg","__v":0}
+{"_id":{"$oid":"675070ff27ffbdff17714d13"},"nombre":"camiseta TypeScript","precio":30000,"imagen":"HCgwzp_VB.jpeg","__v":0}
+{"_id":{"$oid":"6750711c27ffbdff17714d1c"},"nombre":"Camiseta HTML","precio":50000,"imagen":"7RX-EnHxr.jpeg","__v":0}
+{"_id":{"$oid":"6750712e27ffbdff17714d20"},"nombre":"camiseta Sass","precio":30000,"imagen":"CdJec_cXc.jpeg","__v":0}
+{"_id":{"$oid":"6750714127ffbdff17714d24"},"nombre":"camiseta Angular","precio":23000,"imagen":"rBW83V2cj.jpeg","__v":0}
+{"_id":{"$oid":"6750715a27ffbdff17714d28"},"nombre":"camiseta React","precio":23000,"imagen":"ct8Dd-Rl2.jpeg","__v":0}
+{"_id":{"$oid":"6750716e27ffbdff17714d2c"},"nombre":"camiseta Vue.js","precio":12000,"imagen":"j_ZpoQDvc.jpeg","__v":0}
+{"_id":{"$oid":"6750718827ffbdff17714d30"},"nombre":"camiseta Redux","precio":120000,"imagen":"NI-5I_Pbl.jpeg","__v":0}
+{"_id":{"$oid":"675071af27ffbdff17714d34"},"nombre":"camiseta drupal","precio":32300,"imagen":"9j-lvSVOn.jpeg","__v":0}
+{"_id":{"$oid":"675071c427ffbdff17714d38"},"nombre":"camiseta Bulma.js","precio":19000,"imagen":"H6i_XP04W.jpeg","__v":0}
+{"_id":{"$oid":"675071d827ffbdff17714d3c"},"nombre":"camiseta Git","precio":43000,"imagen":"D34bdmZ6q.jpeg","__v":0}

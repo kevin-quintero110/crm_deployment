@@ -1,0 +1,25 @@
+{
+  "name": "rest-apis-juan-torres",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "desarrollo": "node --watch index.js",
+    "start": "node ./index.js"
+  },
+  "author": "kevin",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "express": "^4.21.1",
+    "mongoose": "^8.7.2"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "shortid": "^2.2.16"
+  }
+}
