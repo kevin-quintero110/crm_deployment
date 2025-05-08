@@ -1,5 +1,7 @@
-const mongoose  = require("mongoose")
-const Schema =  mongoose.Schema
+const mongoose = require("mongoose");
+const db = require("../config/db.js"); 
+
+const Schema = mongoose.Schema;
 
 
 const pedidosSchema = new Schema({
