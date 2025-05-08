@@ -10,7 +10,7 @@ const cors = require('cors');
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.DB_URL);
 
-// servidor
+// servidorr
 const app = express();
 
 app.use(express.json());
