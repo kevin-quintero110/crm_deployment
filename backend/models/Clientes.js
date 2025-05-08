@@ -1,4 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const db = require("../config/db.js"); // Solo si lo necesitas
+
 const Schema = mongoose.Schema;
 
 const clientesSchema = new Schema({

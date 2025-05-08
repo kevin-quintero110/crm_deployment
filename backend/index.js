@@ -2,15 +2,19 @@ const express = require('express');
 const routes = require('./routes');
 const mongoose = require('mongoose');
 require('dotenv').config({ path: 'variables.env' });
+const connectDB = require('./config/db'); // Importa la conexión
+
 
 // cors permite que un cliente se conecte a otro servidor 
 const cors = require('cors');
 
 // conectar mongo
-mongoose.Promise = global.Promise;
-mongoose.connect(process.env.DB_URL);
+// Conectar a MongoDB antes de iniciar el servidor
+connectDB();
+//mongoose.Promise = global.Promise;
+//mongoose.connect(process.env.DB_URL);
 
-// servidorr
+// servidor
 const app = express();
 
 app.use(express.json());
