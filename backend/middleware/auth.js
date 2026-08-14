@@ -1,29 +1,22 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
+    const authHeader = req.get('Authorization');
+    const secret = process.env.JWT_SECRET || 'LLAVESECRETA';
 
-    // autorizacion por el header
-    const authHeader = req.get('Authorization')
-
-    if(!authHeader){
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         const error = new Error('No autenticado, no hay JWT');
         error.statusCode = 401;
-        throw error;
+        return next(error);
     }
 
+    const token = authHeader.split(' ')[1];
 
-
-
-    //obtener el token
-    const token = authHeader.split(' ')[1]
-    let revisarToken;
     try {
-        revisarToken = jwt.verify(token, 'LLAVESECRETA')
+        jwt.verify(token, secret);
+        next();
     } catch (error) {
-        error.statusCode = 500
-        throw error;
-    
+        error.statusCode = 401;
+        return next(error);
     }
-    
-    next()
-}
+};

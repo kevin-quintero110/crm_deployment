@@ -1,74 +1,122 @@
-const Pedidos = require('../models/Pedidos')
+const { prisma } = require('../config/db');
 
-exports.nuevoPedido = async(req, res, next) =>{
-    const pedido = new Pedidos(req.body)
+const serializePedido = (pedido) => pedido ? { ...pedido, _id: pedido.id } : pedido;
+
+exports.nuevoPedido = async (req, res, next) => {
     try {
-        await pedido.save()   
-        res.json({mensaje: "se agrego un nuevo pedido"})    
-    } catch (error) {
-        console.log(error)
-        next()
-    }
-}
+        const clienteId = Number(req.body.clienteId ?? req.params.idUsuario);
+        const pedidoItems = Array.isArray(req.body.pedido) ? req.body.pedido : [];
 
-//Muestra todos los pedidos
-
-exports.mostrarPedidos = async(req,res,next) => {
-
-    try {
-        const pedidos = await Pedidos.find({}).populate('cliente').populate({
-            path: 'pedido.producto',
-            model: "Productos"
-        })
-        res.json(pedidos)
-    } catch (error) {
-        console.log(error)
-        next()
-    }
-}
-
-// muestra un pedido por id 
-
-exports.mostrarPedido =  async (req, res, next) => {
-    const pedido = await Pedidos.findById(req.params.idPedido).populate('cliente').populate({
-        path: 'pedido.producto',
-        model: "Productos"
-    })
-
-    if(!pedido){
-        res.json({mensaje: "ese pedido no existe"});
-        return next()
-    }
-    // mostrar el pedido
-    res.json(pedido)
-} 
-
-// actualizar el pedido por id
-exports.actualizarPedido = async (req, res, next) => {
-    try {
-        let pedido = await Pedidos.findOneAndUpdate({_id: req.params.idPedido}, req.body,{
-            new: true
-        }).populate('cliente').populate({
-            path: 'pedido.producto',
-            model: "Productos"
+        const pedido = await prisma.pedido.create({
+            data: {
+                clienteId,
+                total: Number(req.body.total) || 0,
+                items: {
+                    create: pedidoItems.map(item => ({
+                        cantidad: Number(item.cantidad) || 1,
+                        productoId: Number(item.productoId || item.producto)
+                    }))
+                }
+            },
+            include: {
+                cliente: true,
+                items: {
+                    include: { producto: true }
+                }
+            }
         });
 
-        res.json(pedido)
+        res.json({ mensaje: 'se agrego un nuevo pedido', pedido: serializePedido(pedido) });
     } catch (error) {
-        console.log(error)
-        next()
+        console.error(error);
+        next(error);
     }
-}
+};
 
-// eliminar un pedido
+exports.mostrarPedidos = async (req, res, next) => {
+    try {
+        const pedidos = await prisma.pedido.findMany({
+            include: {
+                cliente: true,
+                items: {
+                    include: { producto: true }
+                }
+            },
+            orderBy: { id: 'asc' }
+        });
+
+        res.json(pedidos.map(serializePedido));
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+exports.mostrarPedido = async (req, res, next) => {
+    try {
+        const pedido = await prisma.pedido.findUnique({
+            where: { id: Number(req.params.idPedido) },
+            include: {
+                cliente: true,
+                items: {
+                    include: { producto: true }
+                }
+            }
+        });
+
+        if (!pedido) {
+            return res.status(404).json({ mensaje: 'ese pedido no existe' });
+        }
+
+        return res.json(serializePedido(pedido));
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
+exports.actualizarPedido = async (req, res, next) => {
+    try {
+        const pedidoId = Number(req.params.idPedido);
+        const items = Array.isArray(req.body.pedido) ? req.body.pedido : [];
+
+        await prisma.pedidoItem.deleteMany({ where: { pedidoId } });
+
+        const pedido = await prisma.pedido.update({
+            where: { id: pedidoId },
+            data: {
+                total: req.body.total !== undefined ? Number(req.body.total) : undefined,
+                clienteId: req.body.clienteId ? Number(req.body.clienteId) : undefined,
+                items: {
+                    create: items.map(item => ({
+                        cantidad: Number(item.cantidad) || 1,
+                        productoId: Number(item.productoId || item.producto)
+                    }))
+                }
+            },
+            include: {
+                cliente: true,
+                items: {
+                    include: { producto: true }
+                }
+            }
+        });
+
+        res.json(serializePedido(pedido));
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
 
 exports.eliminarPedido = async (req, res, next) => {
-     try {
-        
-        await Pedidos.findByIdAndDelete({_id: req.params.idPedido})
-        res.json({mensaje: "se ha eliminado el pedido"})
-     } catch (error) {
-        console.log(error);
-        next()
-     }
-}
+    try {
+        await prisma.pedido.delete({
+            where: { id: Number(req.params.idPedido) }
+        });
+        res.json({ mensaje: 'se ha eliminado el pedido' });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};

@@ -6,6 +6,8 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/[...slug].js" },
+    { "src": "/", "dest": "/frontend/build/index.html" },
+    { "src": "/static/(.*)", "dest": "/frontend/build/static/$1" },
     { "src": "/(.*)", "dest": "/frontend/build/$1" }
   ]
 }

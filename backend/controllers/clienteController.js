@@ -1,75 +1,78 @@
- const Clientes = require('../models/Clientes')
+const { prisma } = require('../config/db');
 
- // agrega un nuevo cliente
- exports.nuevoCliente = async(req, res, next) =>{
-   const cliente = new Clientes(req.body);
+const serializeCliente = (cliente) => cliente ? { ...cliente, _id: cliente.id } : cliente;
 
-   try {
-
-      // almacenar el registro
-
-      await cliente.save()
-      res.json({mensaje: 'se agrego un nuevo cliente'})
-   } catch (error) {
-      // si hay un error, co sole.log y next
-      res.send(error)
-      next()
-   }
- }
-
-
- // mostart todos los clientes 
-
- exports.mostrarClientes = async(req, res, next) =>{
-   try {
-      const clientes = await Clientes.find({})
-      res.json(clientes)
-   } catch (error) {
-      console.log(error)
-      next()
-   }
- }
-
- // muestra un cliente por su id
-
- exports.mostrarCliente = async(req, res, next) =>{
- 
-      const cliente = await Clientes.findById(req.params.idCliente)
-      
-      if(!cliente){
-         res.json({mensaje: 'Ese cliente no existe'})
-         next()
+exports.nuevoCliente = async (req, res, next) => {
+  try {
+    const cliente = await prisma.cliente.create({
+      data: {
+        nombre: req.body.nombre,
+        apellido: req.body.apellido,
+        empresa: req.body.empresa,
+        email: req.body.email,
+        telefono: req.body.telefono
       }
+    });
 
-      // mostrar el cliente
-      res.json(cliente)
- }
+    res.json({ mensaje: 'se agrego un nuevo cliente', cliente: serializeCliente(cliente) });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ mensaje: 'Error al crear cliente', error: error.message });
+    next(error);
+  }
+};
 
- // actualiza un cliente por su id
+exports.mostrarClientes = async (req, res, next) => {
+  try {
+    const clientes = await prisma.cliente.findMany({ orderBy: { id: 'asc' } });
+    res.json(clientes.map(serializeCliente));
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
 
- exports.actualizarCliente = async(req, res, next) =>{
- 
-   try {
-      const cliente = await Clientes.findOneAndUpdate({ _id: req.params.idCliente}, req.body, {
-         new: true
-      });
-      res.json(cliente);
-   } catch (error) {
-      res.send(error)
-      next()
-   }
+exports.mostrarCliente = async (req, res, next) => {
+  try {
+    const cliente = await prisma.cliente.findUnique({
+      where: { id: Number(req.params.idCliente) }
+    });
 
-}
+    if (!cliente) {
+      return res.status(404).json({ mensaje: 'Ese cliente no existe' });
+    }
 
-// elimina un cliente por su id
+    return res.json(serializeCliente(cliente));
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
 
-exports.eliminarCliente = async (req, res, next) =>{
-   try {
-      await Clientes.findOneAndDelete({_id: req.params.idCliente})
-      res.json({mensaje: ' El cliente se ha eliminado'})
-   } catch (error) {
-      console.log(error);
-      next()
-      
-   }
-}
+exports.actualizarCliente = async (req, res, next) => {
+  try {
+    const cliente = await prisma.cliente.update({
+      where: { id: Number(req.params.idCliente) },
+      data: req.body
+    });
+
+    res.json(serializeCliente(cliente));
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ mensaje: 'Error al actualizar cliente', error: error.message });
+    next(error);
+  }
+};
+
+exports.eliminarCliente = async (req, res, next) => {
+  try {
+    await prisma.cliente.delete({
+      where: { id: Number(req.params.idCliente) }
+    });
+
+    res.json({ mensaje: 'El cliente se ha eliminado' });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};

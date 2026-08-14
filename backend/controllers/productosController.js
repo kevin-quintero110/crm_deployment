@@ -1,12 +1,14 @@
-const Productos = require('../models/Productos')
+const { prisma } = require('../config/db');
+
+const serializeProducto = (producto) => producto ? { ...producto, _id: producto.id } : producto;
 
 const multer = require('multer');
 const shortid = require('shortid');
 
 const configuracionMulter = {
-    storage: fileStorage = multer.diskStorage({
+    storage: multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, __dirname+'../../uploads/');
+            cb(null, __dirname + '/../../uploads/');
         },
         filename: (req, file, cb) => {
             const extension = file.mimetype.split('/')[1];
@@ -14,125 +16,118 @@ const configuracionMulter = {
         }
     }),
     fileFilter(req, file, cb) {
-        if ( file.mimetype === 'image/jpeg' ||  file.mimetype ==='image/png' ) {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
             cb(null, true);
         } else {
-            cb(new Error('Formato No válido'))
+            cb(new Error('Formato No válido'));
         }
-    },
-}
+    }
+};
 
-// pasar la configuración y el campo
 const upload = multer(configuracionMulter).single('imagen');
 
-//subir un archivo
-exports.subirArchivo = (req,res,next) =>{
-    upload(req, res, function(error){
-        if(error){
-            res.json({mensaje: error})
+exports.subirArchivo = (req, res, next) => {
+    upload(req, res, function (error) {
+        if (error) {
+            return res.status(400).json({ mensaje: error.message || error });
         }
-        return next()
-    })
-}
+        return next();
+    });
+};
 
-// agregar nuevos productos
-exports.nuevoProducto = async(req, res ) =>{
-    const producto =  new Productos(req.body);
-
+exports.nuevoProducto = async (req, res, next) => {
     try {
-        if(req.file.filename){
-            producto.imagen = req.file.filename
-        }
+        const producto = await prisma.producto.create({
+            data: {
+                nombre: req.body.nombre,
+                precio: Number(req.body.precio) || 0,
+                imagen: req.file ? req.file.filename : req.body.imagen || null
+            }
+        });
 
-        await producto.save();
-        res.json({mensaje: 'Se agrego un nuevo producto'})
+        res.json({ mensaje: 'Se agrego un nuevo producto', producto: serializeProducto(producto) });
     } catch (error) {
-        console.log(error)
-        next()
+        console.error(error);
+        next(error);
     }
-}
+};
 
-
-// muestra todos los productos
-
-exports.mostrarProdutos = async (req, res, next) =>{
+exports.mostrarProdutos = async (req, res, next) => {
     try {
-        const productos = await Productos.find({})
-        res.json(productos)
+        const productos = await prisma.producto.findMany({ orderBy: { id: 'asc' } });
+        res.json(productos.map(serializeProducto));
     } catch (error) {
-        console.log(error)
-        next()
+        console.error(error);
+        next(error);
     }
-}
-
-// muestra un solo producto
+};
 
 exports.mostrarProduto = async (req, res, next) => {
-    const producto = await Productos.findById(req.params.idProducto)
-
-
-    if(!producto){
-        res.json({mensaje: 'Ese producto no existe'})
-        return next()
-    }
-
-    // ostrar el producto
-    res.json(producto)
-}
-
-
-
-// actualiza un producto via id
-
-exports.actualizarProducto = async(req, res, next) =>{
     try {
+        const producto = await prisma.producto.findUnique({
+            where: { id: Number(req.params.idProducto) }
+        });
 
-
-        // construir un nuevo producto
-        let nuevoProducto = req.body;
-
-        // verificar si hay imagen nueva
-        if(req.file) {
-            nuevoProducto.imagen = req.file.filename
-        }else{
-            let productoAnterior = await Productos.findById(req.params.idProducto);
-            nuevoProducto.imagen =  productoAnterior.imagen
+        if (!producto) {
+            return res.status(404).json({ mensaje: 'Ese producto no existe' });
         }
-      
-      
-      
-      
-        let producto = await Productos.findOneAndUpdate({_id: req.params.idProducto}, nuevoProducto, {
-                new: true
-            })
-        res.json(producto)
+
+        return res.json(serializeProducto(producto));
     } catch (error) {
-        console.log(error)
-        next()
+        console.error(error);
+        next(error);
     }
-}
+};
 
+exports.actualizarProducto = async (req, res, next) => {
+    try {
+        const productoAnterior = await prisma.producto.findUnique({
+            where: { id: Number(req.params.idProducto) }
+        });
 
-// Elimina un producto via ID
+        const producto = await prisma.producto.update({
+            where: { id: Number(req.params.idProducto) },
+            data: {
+                nombre: req.body.nombre ?? productoAnterior?.nombre,
+                precio: req.body.precio !== undefined ? Number(req.body.precio) : productoAnterior?.precio,
+                imagen: req.file ? req.file.filename : productoAnterior?.imagen
+            }
+        });
+
+        res.json(serializeProducto(producto));
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
+};
+
 exports.eliminarProducto = async (req, res, next) => {
     try {
-        await Productos.findByIdAndDelete({ _id : req.params.idProducto });
-        res.json({mensaje : 'El Producto se ha eliminado'});
+        await prisma.producto.delete({
+            where: { id: Number(req.params.idProducto) }
+        });
+        res.json({ mensaje: 'El Producto se ha eliminado' });
     } catch (error) {
-        console.log(error);
-        next();
+        console.error(error);
+        next(error);
     }
-}
-
+};
 
 exports.buscarProducto = async (req, res, next) => {
     try {
-        // obtener el query
-        const { query } =  req.params
-        const producto =  await Productos.find({ nombre: new RegExp(query, 'i')})
-        res.json(producto)
+        const { query } = req.params;
+        const productos = await prisma.producto.findMany({
+            where: {
+                nombre: {
+                    contains: query,
+                    mode: 'insensitive'
+                }
+            }
+        });
+
+        res.json(productos.map(serializeProducto));
     } catch (error) {
-        console.log(error)
-        next()
+        console.error(error);
+        next(error);
     }
-}
+};

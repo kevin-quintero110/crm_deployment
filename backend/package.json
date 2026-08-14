@@ -5,19 +5,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "desarrollo": "node --watch index.js",
-    "start": "node ./index.js"
+    "start": "node ./index.js",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate dev --name init"
   },
   "author": "kevin",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "@prisma/client": "^6.2.0",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.2",
     "multer": "^1.4.5-lts.1",
+    "prisma": "^6.2.0",
     "shortid": "^2.2.16"
   }
 }

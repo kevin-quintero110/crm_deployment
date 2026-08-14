@@ -10,7 +10,11 @@ const usuariosController = require('../controllers/usuariosController')
 const auth = require('../middleware/auth')
 
 module.exports = function() {
-  
+
+    router.get('/', (req, res) => {
+        res.json({ mensaje: 'API CRM funcionando' })
+    })
+
     // agrega nuevos clientes via post
     router.post('/clientes', auth, clienteController.nuevoCliente)
 
