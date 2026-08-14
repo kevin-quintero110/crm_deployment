@@ -10,9 +10,6 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "postinstall": "prisma generate"
   },
-  "author": "kevin",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@prisma/client": "^6.2.0",
     "bcryptjs": "^2.4.3",
@@ -22,7 +19,6 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "prisma": "^6.2.0",
-    "serverless-http": "^4.0.0",
     "shortid": "^2.2.16"
   }
 }
