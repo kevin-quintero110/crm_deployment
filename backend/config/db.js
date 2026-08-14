@@ -1,6 +1,7 @@
-import postgres from 'postgres'
+const { PrismaClient } = require('@prisma/client');
 
-const connectionString = process.env.DATABASE_URL
-const sql = postgres(connectionString)
+const prisma = new PrismaClient();
 
-export default sql
+module.exports = {
+    prisma
+};
