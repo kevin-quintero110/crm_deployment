@@ -8,6 +8,7 @@
     "dev": "cd backend && npm run desarrollo"
   },
   "dependencies": {
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "serverless-http": "^4.0.0"
   }
 }
