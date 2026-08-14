@@ -1,5 +1,12 @@
+const serverless = require('serverless-http');
+const app = require('../backend/index');
+
+const handler = serverless(app);
+
 module.exports = (req, res) => {
-    res.status(200).json({
-        mensaje: 'Vercel está ejecutando correctamente la función'
-    });
+    if (req.url && req.url.startsWith('/api')) {
+        req.url = req.url.replace(/^\/api/, '') || '/';
+    }
+
+    return handler(req, res);
 };
