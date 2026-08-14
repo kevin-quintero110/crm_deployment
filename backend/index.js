@@ -51,7 +51,5 @@ app.use('/', routes());
 const host = process.env.HOST || '0.0.0.0'
 const port = process.env.PORT || 5000
 
-//iniciar app
-app.listen(port, host, () =>{
-    console.log('el servidor esta funcionando')
-})
+// Exportar app para entornos serverless (Vercel)
+module.exports = app;
