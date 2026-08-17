@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const serverless = require('serverless-http'); // <-- AÑADE ESTO
 
 require('dotenv').config({
     path: path.resolve(__dirname, '.env')
@@ -46,12 +47,13 @@ app.use('/', routes());
 const host = process.env.HOST || '0.0.0.0';
 const port = Number(process.env.PORT) || 5000;
 
-// Ejecutar servidor
+// Ejecutar servidor (SOLO EN LOCAL)
 if (require.main === module) {
     app.listen(port, host, () => {
         console.log(`🚀 Tu app está lista en http://${host}:${port}`);
     });
 }
 
-// Exportar para Vercel
+// EXPORTAR PARA VERCEL (serverless)
 module.exports = app;
+module.exports.handler = serverless(app); // <-- AÑADE ESTA LÍNEA
